@@ -70,7 +70,7 @@
     font-size:11.5px; color:var(--gray); margin-top:1px;
   }
   nav.tabs{
-    display:flex; gap:6px;
+    display:flex; gap:6px; flex-wrap:wrap;
     background:var(--white);
     border:1px solid var(--line);
     padding:4px;
@@ -78,11 +78,12 @@
   }
   nav.tabs button{
     border:none; background:transparent; cursor:pointer;
-    padding:9px 18px;
+    padding:9px 16px;
     font-family:'Inter',sans-serif;
-    font-size:14px; font-weight:600;
+    font-size:13.5px; font-weight:600;
     color:var(--gray);
     border-radius:8px;
+    white-space:nowrap;
     transition:all .18s ease;
   }
   nav.tabs button:hover{ color:var(--ink-soft); }
@@ -290,9 +291,9 @@
     .photo-box{ max-width:200px; margin:0 auto; }
     .info-grid{ grid-template-columns:1fr; }
     .doc-grid{ grid-template-columns:1fr 1fr; }
-    .topnav-inner{ padding:14px 18px; }
+    .topnav-inner{ padding:14px 18px; flex-wrap:wrap; gap:10px; }
     .brand-name{ font-size:15px; }
-    nav.tabs button{ padding:8px 13px; font-size:13px; }
+    nav.tabs button{ padding:8px 12px; font-size:12.5px; }
   }
   @media (max-width: 480px){
     .doc-grid{ grid-template-columns:1fr; }
@@ -315,6 +316,8 @@
     <nav class="tabs" role="tablist" aria-label="Portfolio sections">
       <button id="tab-about" class="active" role="tab" aria-selected="true" aria-controls="view-about" onclick="switchTab('about')">About Me</button>
       <button id="tab-docs" role="tab" aria-selected="false" aria-controls="view-docs" onclick="switchTab('docs')">Documents</button>
+      <button id="tab-reports" role="tab" aria-selected="false" aria-controls="view-reports" onclick="switchTab('reports')">Reports &amp; Media</button>
+      <button id="tab-evals" role="tab" aria-selected="false" aria-controls="view-evals" onclick="switchTab('evals')">Evaluation Forms</button>
     </nav>
   </div>
 </header>
@@ -370,10 +373,16 @@
           </div>
         </div>
 
-        <button class="btn-pink" onclick="switchTab('docs')">
-          View Documents
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn-pink" onclick="switchTab('docs')">
+            View Documents
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+          <button class="btn-pink" onclick="switchTab('reports')">
+            View Reports &amp; Media
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -386,6 +395,26 @@
     </div>
 
     <div id="doc-categories"></div>
+  </section>
+
+  <!-- ===== REPORTS & MEDIA VIEW ===== -->
+  <section id="view-reports" class="view">
+    <div class="doc-head">
+      <h1>Reports and Media</h1>
+      <p>This section serves as a structured record of my weekly training progress. It combines written technical reports with photo documentation to track my daily tasks, hands-on learning experiences, and workplace milestones throughout the internship.</p>
+    </div>
+
+    <div id="reports-categories"></div>
+  </section>
+
+  <!-- ===== EVALUATION FORMS VIEW ===== -->
+  <section id="view-evals" class="view">
+    <div class="doc-head">
+      <h1>Evaluation Forms</h1>
+      <p>Formal evaluation instruments completed by the student intern, supervisor, HTE, and OJT adviser to assess overall internship performance.</p>
+    </div>
+
+    <div id="evals-categories"></div>
   </section>
 
 </main>
@@ -409,34 +438,23 @@
 
 <script>
   // ---------- Tab switching ----------
+  const VIEWS = ['about', 'docs', 'reports', 'evals'];
   function switchTab(name){
-    const about = document.getElementById('view-about');
-    const docs = document.getElementById('view-docs');
-    const tabAbout = document.getElementById('tab-about');
-    const tabDocs = document.getElementById('tab-docs');
-
-    if(name === 'about'){
-      about.classList.add('active');
-      docs.classList.remove('active');
-      tabAbout.classList.add('active');
-      tabDocs.classList.remove('active');
-      tabAbout.setAttribute('aria-selected','true');
-      tabDocs.setAttribute('aria-selected','false');
-    } else {
-      docs.classList.add('active');
-      about.classList.remove('active');
-      tabDocs.classList.add('active');
-      tabAbout.classList.remove('active');
-      tabDocs.setAttribute('aria-selected','true');
-      tabAbout.setAttribute('aria-selected','false');
-    }
+    VIEWS.forEach(v => {
+      const section = document.getElementById('view-' + v);
+      const tabBtn = document.getElementById('tab-' + v);
+      const isActive = v === name;
+      section.classList.toggle('active', isActive);
+      tabBtn.classList.toggle('active', isActive);
+      tabBtn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
   // ---------- Document data ----------
   const categories = [
     {
-      letter:'A', cls:'a', title:'Before OJT',
+      letter:'A', cls:'a', title:'Before On-the-Job Training', tab:'docs',
       items:[
         'Approval Sheet','Company Profile','Memorandum of Agreement',
         'Letter of Intent (LoI)','Letter of Endorsement (LOE)','Student Waiver',
@@ -444,15 +462,19 @@
       ]
     },
     {
-      letter:'B', cls:'b', title:'During OJT',
-      items:['Weekly Reports','Weekly Photo Documentation']
-    },
-    {
-      letter:'C', cls:'c', title:'After OJT',
+      letter:'B', cls:'b', title:'After On-the-Job Training', tab:'docs',
       items:['Daily Attendance Sheet','Experience Summary Report','Certificate of Completion']
     },
     {
-      letter:'D', cls:'d', title:'Evaluation Forms',
+      letter:'A', cls:'a', title:'Weekly Reports', tab:'reports', disambiguate:true,
+      items:['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8','Week 9']
+    },
+    {
+      letter:'B', cls:'b', title:'Weekly Photo Documentation', tab:'reports', disambiguate:true,
+      items:['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8','Week 9']
+    },
+    {
+      title:'Evaluation Forms', tab:'evals', noHeader:true,
       items:[
         'Evaluation Instrument for Student Intern','Evaluation Instrument for Supervisor',
         'Evaluation Instrument for HTE','OJT Adviser Evaluation','Performance Evaluation Grading'
@@ -465,28 +487,43 @@
       <path d="M15 2v5h5"/>
     </svg>`;
 
-  function buildDocuments(){
-    const wrap = document.getElementById('doc-categories');
-    wrap.innerHTML = categories.map(cat => `
-      <div class="category">
+  function renderCategory(cat){
+    const header = cat.noHeader ? '' : `
         <div class="category-head">
           <div class="cat-letter ${cat.cls}">${cat.letter}</div>
           <h2>${cat.title}</h2>
           <span class="count mono">${cat.items.length} ITEMS</span>
-        </div>
+        </div>`;
+    return `
+      <div class="category">${header}
         <div class="doc-grid">
-          ${cat.items.map(item => `
-            <button type="button" class="doc-card" onclick="openModal('${escapeStr(item)}','${cat.title}')">
+          ${cat.items.map(item => {
+            const modalTitle = cat.disambiguate ? `${cat.title} — ${item}` : item;
+            return `
+            <button type="button" class="doc-card" onclick="openModal('${escapeStr(modalTitle)}','${cat.title}')">
               <div class="doc-icon">${docIconSVG}</div>
               <div class="doc-info">
                 <div class="t">${item}</div>
                 <div class="s">View Document</div>
               </div>
             </button>
-          `).join('')}
+          `;}).join('')}
         </div>
       </div>
-    `).join('');
+    `;
+  }
+
+  function buildDocuments(){
+    const containers = {
+      docs: document.getElementById('doc-categories'),
+      reports: document.getElementById('reports-categories'),
+      evals: document.getElementById('evals-categories')
+    };
+    const grouped = { docs: [], reports: [], evals: [] };
+    categories.forEach(cat => grouped[cat.tab].push(cat));
+    Object.keys(containers).forEach(tab => {
+      containers[tab].innerHTML = grouped[tab].map(renderCategory).join('');
+    });
   }
   function escapeStr(s){ return s.replace(/'/g, "\\'"); }
 
