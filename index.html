@@ -125,9 +125,11 @@
 
 </main>
 
-<!-- ===== MODAL ===== -->
+<!-- ===== MODAL CONTAINER ===== -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
   <div class="modal-box" id="modalBox" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    
+    <!-- Modal Header -->
     <div class="modal-header">
       <div class="modal-header-left">
         <div class="modal-icon" id="modalIcon"></div>
@@ -138,7 +140,31 @@
       </div>
       <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
     </div>
-    <div class="modal-body" id="modalPreviewArea"></div>
+
+    <!-- Mini Toolbar Control Layer -->
+    <div class="modal-viewer-toolbar" id="modalToolbar" style="display: none;">
+      <div class="toolbar-group" id="imageZoomControls">
+        <button onclick="adjustZoom(-0.15)" title="Zoom Out" aria-label="Zoom Out">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <span id="zoomPercentage" class="mono">100%</span>
+        <button onclick="adjustZoom(0.15)" title="Zoom In" aria-label="Zoom In">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button onclick="resetZoom()" title="Reset View" class="text-btn">Reset</button>
+      </div>
+      <div class="toolbar-hint" id="pdfZoomHint" style="display: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Use <kbd>Ctrl</kbd> + <kbd>+</kbd> / <kbd>-</kbd> to zoom PDF</span>
+      </div>
+    </div>
+
+    <!-- Scrollable Document Wrapper Body -->
+    <div class="modal-body" id="modalBody">
+      <div id="modalPreviewArea" style="width: 100%; height: 100%; display: flex; align-items: flex-start; justify-content: center;"></div>
+    </div>
+
+    <!-- Modal Footer -->
     <div class="modal-footer">
       <span class="modal-status" id="modalStatus">Slot ready for upload</span>
       <a id="modalOpenLink" href="#" target="_blank" rel="noopener" class="modal-open-link" style="display:none;">Open in new tab ↗</a>
@@ -166,9 +192,9 @@
     {
       letter:'A', cls:'a', title:'Before On-the-Job Training', tab:'docs',
       items:[
-        'Approval Sheet','Company Profile','Memorandum of Agreement',
-        'Letter of Intent (LoI)','Letter of Endorsement (LOE)','Student Waiver',
-        'Internship Agreement','Consent Form','Curriculum Vitae','Insurance','Medical Certificate'
+        'Approval Sheet','Company Profile','Curriculum Vitae', 'Memorandum of Agreement',
+        'Letter of Intent (LoI)','Letter of Endorsement (LoE)','Student Waiver',
+        'Internship Agreement','Consent Form','Insurance','Medical Certificate'
       ]
     },
     {
@@ -250,14 +276,15 @@
     },
     'Letter of Intent (LoI)': {
       kind: 'image',
-      dataUrl: 'documents/LOI.jpg'
-    }
+      dataUrl: 'documents/LoI.jpg'
+    },
+    'Letter of Endorsement (LOE)': {
+      kind: 'image',
+      dataUrl: 'documents/LOE.jpg'
+    },
   };
 
   // ---------- Helper: turn a base64 data URI into a Blob URL ----------
-  // Browsers (Chrome in particular) block data: URIs from being used
-  // directly in iframes or opened in new tabs. Blob URLs are not
-  // restricted this way, so we convert once and cache the result.
   function dataUrlToBlobUrl(dataUrl){
     const [meta, b64] = dataUrl.split(',');
     const mimeMatch = meta.match(/data:([^;]+)/);
@@ -272,7 +299,11 @@
     return URL.createObjectURL(blob);
   }
 
-  // ---------- Modal ----------
+  // ---------- Enhanced Modal File Open / Zoom Operations Engine ----------
+  let currentZoom = 1.0;
+  const MIN_ZOOM = 0.4;
+  const MAX_ZOOM = 3.0;
+
   function openModal(title, catTitle){
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalCat').textContent = catTitle;
@@ -282,33 +313,46 @@
     const statusEl = document.getElementById('modalStatus');
     const openLink = document.getElementById('modalOpenLink');
     const modalBox = document.getElementById('modalBox');
+    const toolbar = document.getElementById('modalToolbar');
+    const imageControls = document.getElementById('imageZoomControls');
+    const pdfHint = document.getElementById('pdfZoomHint');
+    const modalBody = document.getElementById('modalBody');
+
+    // Reset layout attributes
+    currentZoom = 1.0;
+    document.getElementById('zoomPercentage').textContent = '100%';
+    modalBody.scrollLeft = 0;
+    modalBody.scrollTop = 0;
 
     const file = documentFiles[title];
 
     if(file){
-      // Only base64 data: URIs need blob conversion (browsers block those
-      // directly in iframes/links). Plain relative file paths — like a
-      // real PDF served from this repo — work as-is.
-      if(!file.blobUrl && file.dataUrl.startsWith('data:')){
-        try{
-          file.blobUrl = dataUrlToBlobUrl(file.dataUrl);
-        } catch(err){
-          console.error('Could not prepare file preview', err);
-        }
-      }
+      modalBox.classList.add('wide');
+      toolbar.style.display = 'flex';
+      
       const src = file.blobUrl || file.dataUrl;
+      
       if(file.kind === 'pdf'){
+        imageControls.style.display = 'none';
+        pdfHint.style.display = 'flex';
         previewArea.innerHTML = `
           <div class="modal-file-frame">
             <iframe src="${src}" title="${title} preview"></iframe>
           </div>`;
       } else {
-        previewArea.innerHTML = `<img src="${src}" alt="${title}">`;
+        pdfHint.style.display = 'none';
+        imageControls.style.display = 'flex';
+        previewArea.innerHTML = `
+          <div class="zoom-container" id="zoomTarget">
+            <img src="${src}" alt="${title}">
+          </div>`;
       }
       statusEl.textContent = 'Uploaded';
       openLink.href = src;
       openLink.style.display = 'inline';
     } else {
+      modalBox.classList.remove('wide');
+      toolbar.style.display = 'none';
       previewArea.innerHTML = `
         <div class="modal-preview">
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#c7ccd2" stroke-width="1.4" style="margin:0 auto;display:block;">
@@ -323,8 +367,32 @@
 
     document.getElementById('modalOverlay').classList.add('open');
   }
+
+  function adjustZoom(amount) {
+    const target = document.getElementById('zoomTarget');
+    if (!target) return;
+
+    let newZoom = currentZoom + amount;
+    if (newZoom < MIN_ZOOM) newZoom = MIN_ZOOM;
+    if (newZoom > MAX_ZOOM) newZoom = MAX_ZOOM;
+
+    currentZoom = newZoom;
+    target.style.transform = `scale(${currentZoom})`;
+    document.getElementById('zoomPercentage').textContent = `${Math.round(currentZoom * 100)}%`;
+  }
+
+  function resetZoom() {
+    const target = document.getElementById('zoomTarget');
+    if (!target) return;
+
+    currentZoom = 1.0;
+    target.style.transform = `scale(1)`;
+    document.getElementById('zoomPercentage').textContent = '100%';
+  }
+
   function closeModal(){
     document.getElementById('modalOverlay').classList.remove('open');
+    document.getElementById('modalPreviewArea').innerHTML = '';
   }
   document.addEventListener('keydown', e => {
     if(e.key === 'Escape') closeModal();
