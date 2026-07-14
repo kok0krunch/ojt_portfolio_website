@@ -291,6 +291,13 @@
       kind: 'image',
       dataUrl: 'weekly_photo\\Weekly Photo(W1).jpg'
     },
+    'Weekly Photo Documentation — Week 2': {
+      kind: 'image',
+      dataUrl: [
+        'weekly_photo/Weekly Photo(W2.1).jpg', 
+        'weekly_photo/Weekly Photo(W2.2).jpg'
+      ]
+    }
   };
 
 
@@ -347,19 +354,24 @@
         pdfHint.style.display = 'flex';
         previewArea.innerHTML = `
           <div class="modal-file-frame">
-            <iframe src="${src}" title="${title} preview"></iframe>
+            <iframe src="${file.dataUrl}" title="${title} preview"></iframe>
           </div>`;
       } else {
         pdfHint.style.display = 'none';
         imageControls.style.display = 'flex';
+        const imagesArray = Array.isArray(file.dataUrl) ? file.dataUrl : [file.dataUrl];
+        let imagesHTML = '';
+        imagesArray.forEach(src => {
+          imagesHTML += `<img src="${src}" alt="${title}" class="viewer-img">`;
+        });
         previewArea.innerHTML = `
           <div class="zoom-container" id="zoomTarget">
-            <img src="${src}" alt="${title}">
+            ${imagesHTML}
           </div>`;
+        openLink.href = imagesArray[0];
+        openLink.style.display = 'inline';
       }
       statusEl.textContent = 'Uploaded';
-      openLink.href = src;
-      openLink.style.display = 'inline';
     } else {
       modalBox.classList.remove('wide');
       toolbar.style.display = 'none';
