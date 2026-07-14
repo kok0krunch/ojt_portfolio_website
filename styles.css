@@ -217,7 +217,7 @@
   .doc-card:focus-visible{ outline:2px solid var(--pink-deep); outline-offset:2px; }
   .doc-icon{
     width:36px; height:36px; border-radius:9px; flex-shrink:0;
-    background:var(--pink-tint);
+    background: transparent;
     display:flex; align-items:center; justify-content:center;
   }
   .doc-icon svg{ width:17px; height:17px; }
