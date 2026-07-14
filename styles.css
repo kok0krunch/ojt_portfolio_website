@@ -18,7 +18,12 @@
   html{scroll-behavior:smooth;}
   body{
     margin:0;
-    background:var(--canvas);
+    background:url('icon\\portfolio_bg.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top center;
+    background-attachment: fixed;
+    background-color: #fdf1f4;
     color:var(--ink);
     font-family:'Inter',sans-serif;
     -webkit-font-smoothing:antialiased;
