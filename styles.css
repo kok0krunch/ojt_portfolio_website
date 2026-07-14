@@ -200,7 +200,7 @@
     flex-shrink:0;
   }
   .cat-letter.a{ background:var(--pink-deep); }
-  .cat-letter.b{ background:var(--green-deep); }
+  .cat-letter.b{ background:var(--pink-deep); }
   .cat-letter.c{ background:#c9a24a; }
   .cat-letter.d{ background:#7b8fd6; }
   .category-head h2{ font-size:17px; margin:0; font-weight:600; }
