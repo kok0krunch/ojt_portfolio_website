@@ -389,23 +389,6 @@
   text-align: center;
 }
 
-.toolbar-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  opacity: 0.9;
-}
-
-.toolbar-hint kbd {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 11px;
-}
-
-/* Modifying Body Shell Container for Zoom Transformation Coordinates */
 .modal-body {
   flex: 1; 
   overflow: auto;

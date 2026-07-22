@@ -299,6 +299,10 @@
       kind: 'image',
       dataUrl: 'documents\\LoE.jpg'
     },
+    'Insurance': {
+      kind: 'pdf',
+      dataUrl: 'documents\\Insurance.pdf'
+    },
     'Medical Certificate': {
       kind: 'image',
       dataUrl: 'documents\\MedCert.jpg'
@@ -371,8 +375,7 @@
       const src = file.blobUrl || file.dataUrl;
       
       if(file.kind === 'pdf'){
-        imageControls.style.display = 'none';
-        pdfHint.style.display = 'flex';
+        toolbar.style.display = 'none';
         previewArea.innerHTML = `
           <div class="modal-file-frame">
             <iframe src="${file.dataUrl}" title="${title} preview"></iframe>
