@@ -212,8 +212,11 @@
     {
       title:'Evaluation Forms', tab:'evals', noHeader:true,
       items:[
-        'Evaluation Instrument for Student Intern','Evaluation Instrument for Supervisor',
-        'Evaluation Instrument for HTE','OJT Adviser Evaluation','Performance Evaluation Grading'
+        'Evaluation for Student Intern',
+        'Performance Evaluation Grading',
+        'Evaluation for Training Supervisor',
+        'Evaluation for HTE',
+        'OJT Adviser Evaluation'
       ]
     }
   ];
@@ -405,8 +408,25 @@
       kind: 'image',
       dataUrl: ['weekly_photo\\Weekly Photo(W8).jpg']
     },
-  };
-
+  
+  // ---------- Evaluation Documents ----------
+    'Evaluation for Student Intern': {
+      kind: 'image',
+      dataUrl: ['evaluation\\StudentIntern_Evaluation(1).jpg', 'evaluation\\StudentIntern_Evaluation(2).jpg']
+    },
+    'Performance Evaluation Grading': {
+      kind: 'image',
+      dataUrl: ['evaluation\\PerformanceEvaluation.jpg']
+    },
+    'Evaluation for Training Supervisor': {
+      kind: 'image',
+      dataUrl: ['evaluation\\Training_Supervisor(1).jpg', 'evaluation\\Training_Supervisor(2).jpg', 'evaluation\\Training_Supervisor(3).jpg']
+    },
+    'OJT Adviser Evaluation': {
+      kind: 'image',
+      dataUrl: ['evaluation\\OJT_Adviser.jpg']
+    },
+  };    
 
   // ---------- Helper: turn a base64 data URI into a Blob URL ----------
   function dataUrlToBlobUrl(dataUrl){
